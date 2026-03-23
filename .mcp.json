@@ -5,7 +5,10 @@
       "args": ["tsx", "${CLAUDE_PLUGIN_ROOT}/src/server.ts"],
       "env": {
         "ASO_CONFIG_PATH": "${CLAUDE_PLUGIN_DATA}/config.json",
-        "ASO_DATA_PATH": "${CLAUDE_PLUGIN_DATA}/data"
+        "ASO_DATA_PATH": "${CLAUDE_PLUGIN_DATA}/data",
+        "SEARCH_ADS_KEY_PATH": "${SEARCH_ADS_KEY_PATH}",
+        "SEARCH_ADS_CLIENT_ID": "${SEARCH_ADS_CLIENT_ID}",
+        "SEARCH_ADS_TEAM_ID": "${SEARCH_ADS_TEAM_ID}"
       }
     }
   },

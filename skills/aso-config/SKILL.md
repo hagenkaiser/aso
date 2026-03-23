@@ -34,4 +34,20 @@ Set up or update the ASO plugin configuration. The config is saved to `$ASO_CONF
 }
 ```
 
-4. **Confirm** that the config was saved and suggest running `/aso-audit` or `/keyword-research` to get started.
+4. **Search Ads API keys (optional).** Ask the user if they want to set up Apple Search Ads for keyword popularity data. If yes, walk them through it:
+
+   - Go to [Search Ads UI](https://searchads.apple.com) → Settings → API → Create API Certificate
+   - Download the `.p8` private key file and save it somewhere safe (e.g. `~/.config/aso/key.p8`)
+   - Note the **Client ID** (format: `SEARCHADS.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) and **Team ID** (format: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+   - These need to be set as environment variables so the MCP server can use them. Guide the user to add them to their shell profile (`~/.zshrc` or `~/.bashrc`):
+     ```
+     export SEARCH_ADS_KEY_PATH=/path/to/key.p8
+     export SEARCH_ADS_CLIENT_ID=SEARCHADS.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     export SEARCH_ADS_TEAM_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     ```
+   - Remind them to restart Claude Code (or `source ~/.zshrc`) for the vars to take effect
+   - Reference: [Apple docs — Implementing OAuth for the Search Ads API](https://developer.apple.com/documentation/apple_ads/implementing_oauth_for_the_apple_search_ads_api)
+
+   If the user declines, let them know keyword popularity data won't be available but everything else works fine.
+
+5. **Confirm** that the config was saved and suggest running `/aso-audit` or `/keyword-research` to get started.
