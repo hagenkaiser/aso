@@ -5,6 +5,7 @@ import { getKeywordPopularity } from "./searchads.js";
 import type { AppMeta } from "./itunes.js";
 
 const ROOT = resolve(import.meta.dirname, "..");
+const DATA_DIR = process.env.ASO_DATA_PATH ?? join(ROOT, "data");
 
 export interface Config {
   myAppId: string;
@@ -26,25 +27,29 @@ export interface Snapshot {
 }
 
 export function loadConfig(): Config {
-  return JSON.parse(readFileSync(join(ROOT, "config.json"), "utf8")) as Config;
+  const configPath = process.env.ASO_CONFIG_PATH;
+  if (!configPath) {
+    throw new Error(
+      "ASO_CONFIG_PATH is not set. Run /aso-config to configure the plugin."
+    );
+  }
+  return JSON.parse(readFileSync(configPath, "utf8")) as Config;
 }
 
 export function loadLatestSnapshot(): Snapshot | null {
-  const dir = join(ROOT, "data");
-  const files = readdirSync(dir)
+  const files = readdirSync(DATA_DIR)
     .filter((f) => f.endsWith(".json"))
     .sort();
   if (files.length === 0) return null;
-  return JSON.parse(readFileSync(join(dir, files[files.length - 1]), "utf8")) as Snapshot;
+  return JSON.parse(readFileSync(join(DATA_DIR, files[files.length - 1]), "utf8")) as Snapshot;
 }
 
 export function loadSnapshotBefore(daysAgo: number): Snapshot | null {
-  const dir = join(ROOT, "data");
-  const files = readdirSync(dir)
+  const files = readdirSync(DATA_DIR)
     .filter((f) => f.endsWith(".json"))
     .sort();
-  if (files.length < daysAgo + 1) return files.length > 1 ? JSON.parse(readFileSync(join(dir, files[0]), "utf8")) as Snapshot : null;
-  return JSON.parse(readFileSync(join(dir, files[files.length - 1 - daysAgo]), "utf8")) as Snapshot;
+  if (files.length < daysAgo + 1) return files.length > 1 ? JSON.parse(readFileSync(join(DATA_DIR, files[0]), "utf8")) as Snapshot : null;
+  return JSON.parse(readFileSync(join(DATA_DIR, files[files.length - 1 - daysAgo]), "utf8")) as Snapshot;
 }
 
 export async function collect(): Promise<Snapshot> {
@@ -85,7 +90,7 @@ export async function collect(): Promise<Snapshot> {
   }
 
   const filename = snapshot.timestamp.replace(/[:.]/g, "-").slice(0, 16) + ".json";
-  const outPath = join(ROOT, "data", filename);
+  const outPath = join(DATA_DIR, filename);
   writeFileSync(outPath, JSON.stringify(snapshot, null, 2));
   console.log(`Saved snapshot: ${filename}`);
 

@@ -34,7 +34,7 @@ Five tools are available to Claude through the MCP server:
 
 ## Skills
 
-28 ASO skills live in `.claude/skills/`. Claude picks them up automatically in this project.
+28 ASO skills live in `skills/`. When installed as a plugin, Claude picks them up automatically.
 
 **Data-enhanced** — these skills call MCP tools to pull live data before analyzing:
 
@@ -61,28 +61,30 @@ Five tools are available to Claude through the MCP server:
 ### 1. Install dependencies
 
 ```bash
-npm install
+npm run setup
 ```
 
-### 2. Configure your apps and keywords
+### 2. Install as a Claude Code plugin
 
-Edit `config.json`:
-
-```json
-{
-  "myAppId": "123456789",
-  "competitors": [
-    { "name": "Competitor A", "id": "987654321" },
-    { "name": "Competitor B", "id": "111222333" }
-  ],
-  "keywords": ["meditation app", "sleep sounds", "mindfulness"],
-  "country": "us"
-}
 ```
+/plugin install /path/to/aso
+```
+
+This registers the MCP server and all 28 skills automatically.
+
+### 3. Configure your apps and keywords
+
+On your first session after installing, run:
+
+```
+/aso-config
+```
+
+Claude will ask for your app ID, competitors, keywords, and country code. The config is saved to the plugin's persistent data directory and survives plugin updates.
 
 App IDs are the numeric IDs from App Store URLs: `apps.apple.com/app/id123456789`
 
-### 3. (Optional) Apple Search Ads API for keyword popularity
+### 4. (Optional) Apple Search Ads API for keyword popularity
 
 Without this, popularity scores show as `?`. To enable:
 
@@ -96,20 +98,26 @@ export SEARCH_ADS_CLIENT_ID=SEARCHADS.xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 export SEARCH_ADS_TEAM_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-### 4. Register the MCP server with Claude
+<details>
+<summary>Legacy: manual MCP registration</summary>
 
-Add to your Claude Code MCP config (`.claude/settings.json` or `~/Library/Application Support/Claude/claude_desktop_config.json`):
+If you prefer not to use the plugin system, add to your `.claude/settings.json` or `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "aso": {
       "command": "npx",
-      "args": ["tsx", "/absolute/path/to/aso/src/server.ts"]
+      "args": ["tsx", "/absolute/path/to/aso/src/server.ts"],
+      "env": {
+        "ASO_CONFIG_PATH": "/path/to/your/config.json",
+        "ASO_DATA_PATH": "/path/to/your/data/dir"
+      }
     }
   }
 }
 ```
+</details>
 
 ### 5. Collect your first snapshot
 
@@ -120,6 +128,10 @@ npm run collect
 ```
 
 Snapshots are saved to `data/` as timestamped JSON files. Run this daily or weekly to build up a history for trend analysis.
+
+### Updating
+
+After changing skills or server code, run `/reload-plugins` in Claude Code to pick up changes without restarting your session.
 
 ---
 
@@ -167,9 +179,14 @@ aso/
 │   ├── analyze.ts       # Ranking table formatting + snapshot diffing
 │   ├── itunes.ts        # iTunes Search API client
 │   └── searchads.ts     # Apple Search Ads API client
-├── .claude/
-│   └── skills/          # 28 ASO skill files for Claude Code
+├── .claude-plugin/
+│   └── plugin.json      # Claude Code plugin manifest
+├── skills/              # 28 ASO skills (plugin format)
+│   ├── aso-audit/SKILL.md
+│   ├── keyword-research/SKILL.md
+│   └── ...
 ├── data/                # Snapshots (gitignored)
 ├── certs/               # Search Ads keys (gitignored)
-└── config.json          # Your app IDs, competitors, and keywords
+├── .mcp.json            # MCP server config (auto-loaded by plugin)
+└── config.example.json  # Reference for config JSON shape
 ```

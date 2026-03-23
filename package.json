@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "tsx src/server.ts",
-    "collect": "tsx src/collect.ts"
+    "collect": "tsx src/collect.ts",
+    "setup": "bash install.sh"
   },
   "keywords": [],
   "author": "",
